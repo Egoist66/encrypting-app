@@ -10,29 +10,54 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-change-this';
 const users = new Map<string, User>();
 
 export const configurePassport = () => {
+  const clientID = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const serverURL = process.env.SERVER_URL || 'http://localhost:3001';
+  
+  console.log('🔧 Configuring Passport...');
+  console.log('📋 Environment check:', {
+    hasClientID: !!clientID,
+    hasClientSecret: !!clientSecret,
+    serverURL,
+    callbackURL: `${serverURL}/api/auth/google/callback`
+  });
+  
+  if (!clientID || !clientSecret) {
+    throw new Error('Missing Google OAuth credentials. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+  }
+  
   passport.use(
     new GoogleStrategy(
       {
-        clientID: process.env.GOOGLE_CLIENT_ID || '',
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-        callbackURL: `${process.env.SERVER_URL || 'http://localhost:3001'}/api/auth/google/callback`,
+        clientID,
+        clientSecret,
+        callbackURL: `${serverURL}/api/auth/google/callback`,
       },
       (accessToken, refreshToken, profile, done) => {
-        // Преобразуем профиль Google в нашего пользователя
-        const googleProfile = profile as unknown as GoogleProfile;
-        
-        const user: User = {
-          id: googleProfile.id,
-          email: googleProfile.emails[0]?.value || '',
-          name: googleProfile.displayName,
-          picture: googleProfile.photos[0]?.value,
-          createdAt: new Date(),
-        };
+        try {
+          console.log('🔍 Google profile received:', profile.id);
+          
+          // Преобразуем профиль Google в нашего пользователя
+          const googleProfile = profile as unknown as GoogleProfile;
+          
+          const user: User = {
+            id: googleProfile.id,
+            email: googleProfile.emails[0]?.value || '',
+            name: googleProfile.displayName,
+            picture: googleProfile.photos[0]?.value,
+            createdAt: new Date(),
+          };
 
-        // Сохраняем или обновляем пользователя
-        users.set(user.id, user);
+          console.log('👤 User created:', user.email);
 
-        return done(null, user);
+          // Сохраняем или обновляем пользователя
+          users.set(user.id, user);
+
+          return done(null, user);
+        } catch (error) {
+          console.error('❌ Error in Google strategy:', error);
+          return done(error, undefined);
+        }
       }
     )
   );

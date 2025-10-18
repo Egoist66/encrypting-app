@@ -9,7 +9,12 @@ import { configurePassport, verifyToken } from './config/passport.js';
 import { authRouter } from './routes/auth.js';
 
 // Настройка Passport
-configurePassport();
+try {
+  configurePassport();
+  console.log('✅ Passport configured successfully');
+} catch (error) {
+  console.error('❌ Passport configuration failed:', error);
+}
 
 // Создаем Express приложение для serverless function
 const app = express();
@@ -34,6 +39,15 @@ app.get('/api/health', (req, res) => {
   const response: ApiResponse = {
     success: true,
     message: '✅ API работает!',
+    data: {
+      env: {
+        hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+        hasGoogleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        clientUrl: process.env.CLIENT_URL,
+        serverUrl: process.env.SERVER_URL,
+      }
+    }
   };
   res.json(response);
 });
@@ -135,7 +149,17 @@ app.post('/api/decrypt', isAuthenticated, (req, res) => {
 
 // Export как serverless function
 export default async (req: VercelRequest, res: VercelResponse) => {
-  // @ts-ignore
-  return app(req, res);
+  try {
+    console.log(`📝 ${req.method} ${req.url}`);
+    // @ts-ignore
+    return app(req, res);
+  } catch (error) {
+    console.error('❌ Serverless function error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 };
 

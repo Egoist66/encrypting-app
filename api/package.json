@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "check-env": "node check-env.js",
+    "dev": "node --loader ts-node/esm index.ts"
   },
   "dependencies": {
     "@vercel/node": "^3.0.11",
