@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "pnpm --filter client build",
+  "buildCommand": "npm run build --workspace=client",
   "outputDirectory": "client/dist",
-  "installCommand": "pnpm install",
+  "installCommand": "npm install",
   "framework": null,
   "rewrites": [
     {
