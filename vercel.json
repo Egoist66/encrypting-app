@@ -1,14 +1,8 @@
 {
   "buildCommand": "cd client && npm run build && cd ../api && npm run build",
   "outputDirectory": "client/dist",
-  "installCommand": "npm install --prefix client && npm install --prefix api",
+  "installCommand": "bash install-vercel.sh",
   "framework": null,
-  "functions": {
-    "api/index.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/api/:path*",

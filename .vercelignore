@@ -1,10 +1,12 @@
-server/src
-server/dist
-server/node_modules
-client/src
-client/node_modules
+server/
 *.md
 .git
 .gitignore
 .env.local
 .DS_Store
+CHANGELOG_VERCEL_FIX.md
+DEPLOY_QUICK_START.md
+VERCEL_DEPLOY.md
+VERCEL_FIX_SUMMARY.md
+GOOGLE_OAUTH_SETUP.md
+README.md

@@ -1,12 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
-import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import type { ApiResponse, EncryptRequest } from './types.js';
 import { encryptText, decryptText } from './services/encryption.js';
-import { configurePassport } from './config/passport.js';
+import { configurePassport, verifyToken } from './config/passport.js';
 import { authRouter } from './routes/auth.js';
 
 // Настройка Passport
@@ -24,23 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Session middleware для Vercel
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: true, // В продакшене всегда HTTPS
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: 'none',
-    },
-  })
-);
-
-// Passport middleware
+// Passport middleware (без сессий)
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Auth routes
 app.use('/api/auth', authRouter);
@@ -54,16 +38,37 @@ app.get('/api/health', (req, res) => {
   res.json(response);
 });
 
-// Middleware для проверки авторизации
+// Middleware для проверки авторизации через JWT
 const isAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    return next();
+  try {
+    const token = req.cookies.auth_token;
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized. Please log in.',
+      });
+    }
+
+    const user = verifyToken(token);
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired token.',
+      });
+    }
+
+    // Добавляем пользователя в req для использования в роутах
+    (req as any).user = user;
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    res.status(401).json({
+      success: false,
+      error: 'Authentication failed.',
+    });
   }
-  
-  res.status(401).json({
-    success: false,
-    error: 'Unauthorized. Please log in.',
-  });
 };
 
 // Encrypt endpoint (защищен)
