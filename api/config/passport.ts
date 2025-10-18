@@ -18,12 +18,31 @@ export const configurePassport = () => {
   console.log('📋 Environment check:', {
     hasClientID: !!clientID,
     hasClientSecret: !!clientSecret,
+    clientIDLength: clientID ? clientID.length : 0,
+    clientSecretLength: clientSecret ? clientSecret.length : 0,
     serverURL,
     callbackURL: `${serverURL}/api/auth/google/callback`
   });
   
-  if (!clientID || !clientSecret) {
-    throw new Error('Missing Google OAuth credentials. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.');
+  // Более детальная проверка переменных окружения
+  if (!clientID) {
+    console.error('❌ GOOGLE_CLIENT_ID is missing or empty');
+    throw new Error('GOOGLE_CLIENT_ID environment variable is required but not set.');
+  }
+  
+  if (!clientSecret) {
+    console.error('❌ GOOGLE_CLIENT_SECRET is missing or empty');
+    throw new Error('GOOGLE_CLIENT_SECRET environment variable is required but not set.');
+  }
+  
+  if (clientID.trim() === '') {
+    console.error('❌ GOOGLE_CLIENT_ID is empty string');
+    throw new Error('GOOGLE_CLIENT_ID environment variable is set but empty.');
+  }
+  
+  if (clientSecret.trim() === '') {
+    console.error('❌ GOOGLE_CLIENT_SECRET is empty string');
+    throw new Error('GOOGLE_CLIENT_SECRET environment variable is set but empty.');
   }
   
   passport.use(
