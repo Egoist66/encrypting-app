@@ -47,3 +47,8 @@ api/**/*.js
 api/**/*.js.map
 !api/node_modules/
 
+# Package lock files in workspaces (auto-generated)
+client/package-lock.json
+api/package-lock.json
+server/package-lock.json
+
