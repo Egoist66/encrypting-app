@@ -42,3 +42,8 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
+# API compiled files (compiled during Vercel build)
+api/**/*.js
+api/**/*.js.map
+!api/node_modules/
+

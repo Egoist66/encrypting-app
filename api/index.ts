@@ -4,10 +4,10 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
-import type { ApiResponse, EncryptRequest } from '../server/src/types.js';
-import { encryptText, decryptText } from '../server/src/services/encryption.js';
-import { configurePassport } from '../server/src/config/passport.js';
-import { authRouter } from '../server/src/routes/auth.js';
+import type { ApiResponse, EncryptRequest } from './types.js';
+import { encryptText, decryptText } from './services/encryption.js';
+import { configurePassport } from './config/passport.js';
+import { authRouter } from './routes/auth.js';
 
 // Настройка Passport
 configurePassport();

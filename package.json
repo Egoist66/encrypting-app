@@ -15,9 +15,10 @@
     "build": "npm run build --workspace=server && npm run build --workspace=client",
     "build:client": "npm run build --workspace=client",
     "build:server": "npm run build --workspace=server",
+    "build:api": "npm run build --workspace=api",
     "start": "npm run start --workspace=server",
     "type-check": "npm run type-check --workspaces",
-    "clean": "rm -rf node_modules client/node_modules server/node_modules api/node_modules client/dist server/dist package-lock.json"
+    "clean": "rm -rf node_modules client/node_modules server/node_modules api/node_modules client/dist server/dist api/dist package-lock.json"
   },
   "devDependencies": {
     "concurrently": "9.2.1",

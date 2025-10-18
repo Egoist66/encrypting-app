@@ -5,15 +5,20 @@
     "module": "ESNext",
     "lib": ["ES2020"],
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "outDir": ".",
+    "rootDir": ".",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
   },
-  "include": ["*.ts", "../server/src/**/*.ts"]
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
 
