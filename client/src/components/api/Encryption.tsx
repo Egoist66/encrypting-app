@@ -38,6 +38,7 @@ export const Encryption = () => {
     const [showTelegramForm, setShowTelegramForm] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>("encrypt");
     const [lastSavedHash, setLastSavedHash] = useState<string>(""); // Хеш последнего сохраненного сообщения
+    const [showHistoryTab, setShowHistoryTab] = useState<boolean>(false); // Показывать ли вкладку истории
 
     // Функция для проверки наличия дубликатов
     const hasDuplicates = () => {
@@ -86,6 +87,26 @@ export const Encryption = () => {
             }
         }
     }, [encryptedText, encryptionKey, originalText, saveMessage, lastSavedHash]);
+
+    // Обработчик горячих клавиш для показа вкладки истории
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Проверяем комбинацию Ctrl+Escape
+            if (event.ctrlKey && event.key === 'Escape') {
+                event.preventDefault();
+                setShowHistoryTab(true);
+                setActiveTab('history');
+            }
+        };
+
+        // Добавляем обработчик событий
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Очищаем обработчик при размонтировании компонента
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     const handleEncryptWithHistory = async () => {
         console.log('🔐 Начинаем шифрование с сохранением в историю');
@@ -157,7 +178,7 @@ export const Encryption = () => {
         </div>
       )
     },
-    {
+    ...(showHistoryTab ? [{
       id: "history",
       label: "История",
       icon: "📝",
@@ -195,7 +216,7 @@ export const Encryption = () => {
           />
         </div>
       )
-    }
+    }] : [])
   ];
 
   return (
