@@ -32,10 +32,10 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 // Auth routes
-app.use('/auth', authRouter);
+app.use('/api/auth', authRouter);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   const response: ApiResponse = {
     success: true,
     message: '✅ API работает!',
@@ -86,7 +86,7 @@ const isAuthenticated = (req: express.Request, res: express.Response, next: expr
 };
 
 // Encrypt endpoint (защищен)
-app.post('/encrypt', isAuthenticated, (req, res) => {
+app.post('/api/encrypt', isAuthenticated, (req, res) => {
   try {
     const { text } = req.body as EncryptRequest;
 
@@ -117,7 +117,7 @@ app.post('/encrypt', isAuthenticated, (req, res) => {
 });
 
 // Decrypt endpoint (защищен)
-app.post('/decrypt', isAuthenticated, (req, res) => {
+app.post('/api/decrypt', isAuthenticated, (req, res) => {
   try {
     const { encrypted, key } = req.body;
 

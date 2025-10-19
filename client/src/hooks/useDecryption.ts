@@ -17,6 +17,7 @@ export const useDecryption = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({ encrypted, key }),
       });
       const data: ApiResponse = await response.json();
