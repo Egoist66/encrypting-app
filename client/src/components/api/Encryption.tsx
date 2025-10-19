@@ -60,7 +60,7 @@ export const Encryption = () => {
         placeholder="Введите текст..."
         rows={4}
       />
-      <button onClick={handleEncrypt} inert={isEncrypting} disabled={!text || isEncrypting}>
+      <button className="encrypt-btn" onClick={handleEncrypt} inert={isEncrypting} disabled={!text || isEncrypting}>
         {isEncrypting ? "Зашифровывается..." : "Зашифровать"}
       </button>
       {result && (
