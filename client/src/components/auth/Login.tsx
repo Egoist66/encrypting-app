@@ -1,5 +1,4 @@
 import { useAuth } from '../../context/AuthContext';
-import '../../style/Login.css';
 
 export const Login = () => {
   const { login } = useAuth();

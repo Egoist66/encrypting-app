@@ -155,31 +155,6 @@
   width: 100%;
 }
 
-@media (min-width: 1024px) {
-  .encryption-form {
-    max-width: 1080px;
-    padding: 3rem;
-  }
-  
-  .encryption-form h2 {
-    font-size: 1.75rem;
-  }
-  
-  div.result-content {
-    flex-direction: row;
-    gap: 2rem;
-  }
-  
-  .result-item {
-    flex: 1;
-    padding: 1.5rem;
-  }
-  
-  .result-value pre {
-    font-size: 0.9rem;
-  }
-}
-
 .encryption-form h2 {
   margin: 0 0 1.5rem;
   color: #333;
@@ -219,7 +194,6 @@
 }
 
 .encryption-form button {
-  width: 100%;
   margin-top: 1rem;
   padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -288,6 +262,7 @@
   font-size: 0.95rem;
 }
 
+
 .copy-btn {
   padding: 0.5rem 0.75rem;
   background: #667eea;
@@ -301,7 +276,42 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  width: 33.3333% !important;
+  width: 35%;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .App-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .user-profile {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .result-label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  button.copy-btn {
+    align-self: flex-end;
+    width: 100%;
+  }
+
+  .result-value pre {
+    font-size: 0.8rem;
+  }
+
+  body {
+    background-color: red !important;
+  }
 }
 
 
@@ -385,33 +395,30 @@
   }
 }
 
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    text-align: center;
-  }
 
-  .App-header h1 {
+
+@media (min-width: 1024px) {
+  .encryption-form {
+    max-width: 1080px;
+    padding: 3rem;
+  }
+  
+  .encryption-form h2 {
     font-size: 1.75rem;
   }
-
-  .user-profile {
-    width: 100%;
-    justify-content: center;
+  
+  div.result-content {
+    flex-direction: row;
+    gap: 2rem;
   }
-
-  .result-label {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+  
+  .result-item {
+    flex: 1;
+    padding: 1.5rem;
   }
-
-  .copy-btn {
-    align-self: flex-end;
-  }
-
+  
   .result-value pre {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 }
 
