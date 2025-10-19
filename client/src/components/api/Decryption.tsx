@@ -29,6 +29,7 @@ export const Decryption = () => {
       />
       <button
         onClick={handleDecrypt}
+        className="decrypt-btn"
         inert={isDecrypting}
         disabled={!encrypted || !key || isDecrypting}
       >

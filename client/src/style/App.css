@@ -315,6 +315,10 @@ button {
   margin-top: 0px !important;
 }
 
+button.decrypt-btn {
+  margin-top: 20px !important;
+}
+
 .copy-btn:hover {
   background: #5a6fd8;
   transform: translateY(-1px);
