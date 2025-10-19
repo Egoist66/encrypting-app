@@ -137,7 +137,7 @@ export const Encryption = () => {
                   <small className="help-text">
                     <strong>📱 Для отправки по @username:</strong>
                     <br />
-                    1. Получатель должен написать боту @encrypt_app_bot
+                    1. Получатель должен написать боту <a href="https://t.me/encrypt_app_bot" target="_blank">@encrypt_app_bot</a>
                     <br />
                     2. Затем используйте числовой ID (например, 568285771)
                     <br />
