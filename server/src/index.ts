@@ -10,6 +10,12 @@ import { configurePassport } from './config/passport.js';
 
 dotenv.config();
 
+// Отладочная информация
+console.log('🔧 Переменные окружения:');
+console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? '✅ Установлен' : '❌ Не установлен');
+console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ Установлен' : '❌ Не установлен');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 

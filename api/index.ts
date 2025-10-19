@@ -3,10 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
-import type { ApiResponse, EncryptRequest } from './types.js';
+import type { ApiResponse, EncryptRequest, TelegramSendRequest } from './types.js';
 import { encryptText, decryptText } from './services/encryption.js';
 import { configurePassport, verifyToken } from './config/passport.js';
 import { authRouter } from './routes/auth.js';
+import { sendTelegramMessage, formatEncryptedMessage, isValidChatId, sendEncryptedMessageSeparate } from './services/telegram.js';
 
 // Настройка Passport
 try {
@@ -142,6 +143,55 @@ app.post('/api/decrypt', isAuthenticated, (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Не удалось расшифровать текст!',
+    };
+    res.status(500).json(response);
+  }
+});
+
+// Telegram send endpoint (защищен)
+app.post('/api/telegram/send', isAuthenticated, async (req, res) => {
+  try {
+    const { chat_id, encrypted_text, encryption_key, original_text } = req.body as TelegramSendRequest;
+
+    if (!chat_id || !encrypted_text || !encryption_key) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'chat_id, encrypted_text и encryption_key обязательны!',
+      };
+      return res.status(400).json(response);
+    }
+
+    if (!isValidChatId(chat_id)) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Неверный формат chat_id! Используйте @username или числовой ID.',
+      };
+      return res.status(400).json(response);
+    }
+
+    const result = await sendEncryptedMessageSeparate(chat_id, encrypted_text, encryption_key, original_text);
+
+    if (result.success) {
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          message_id: result.message_id,
+        },
+        message: 'Сообщение успешно отправлено в Telegram!',
+      };
+      res.json(response);
+    } else {
+      const response: ApiResponse = {
+        success: false,
+        error: result.error || 'Не удалось отправить сообщение в Telegram',
+      };
+      res.status(500).json(response);
+    }
+  } catch (error) {
+    console.error('Ошибка отправки в Telegram:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: 'Не удалось отправить сообщение в Telegram!',
     };
     res.status(500).json(response);
   }
