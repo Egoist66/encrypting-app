@@ -311,7 +311,9 @@
 
  
 }
-
+button {
+  margin-top: 0px;
+}
 
 .copy-btn:hover {
   background: #5a6fd8;
