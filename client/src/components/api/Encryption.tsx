@@ -2,7 +2,6 @@ import { useEncryption } from "../../hooks/useEncryption";
 import { useTelegram } from "../../hooks/useTelegram";
 import { useMessageHistory } from "../../hooks/useMessageHistory";
 import { MessageHistory } from "../MessageHistory";
-import { Tabs } from "../Tabs";
 import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
@@ -38,7 +37,6 @@ export const Encryption = () => {
     const [showTelegramForm, setShowTelegramForm] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>("encrypt");
     const [lastSavedHash, setLastSavedHash] = useState<string>(""); // Хеш последнего сохраненного сообщения
-    const [showHistoryTab, setShowHistoryTab] = useState<boolean>(false); // Показывать ли вкладку истории
 
     // Функция для проверки наличия дубликатов
     const hasDuplicates = () => {
@@ -88,25 +86,6 @@ export const Encryption = () => {
         }
     }, [encryptedText, encryptionKey, originalText, saveMessage, lastSavedHash]);
 
-    // Обработчик горячих клавиш для показа вкладки истории
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            // Проверяем комбинацию Ctrl+Escape
-            if (event.ctrlKey && event.key === 'Escape') {
-                event.preventDefault();
-                setShowHistoryTab(true);
-                setActiveTab('history');
-            }
-        };
-
-        // Добавляем обработчик событий
-        document.addEventListener('keydown', handleKeyDown);
-
-        // Очищаем обработчик при размонтировании компонента
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
 
     const handleEncryptWithHistory = async () => {
         console.log('🔐 Начинаем шифрование с сохранением в историю');
@@ -178,7 +157,7 @@ export const Encryption = () => {
         </div>
       )
     },
-    ...(showHistoryTab ? [{
+    {
       id: "history",
       label: "История",
       icon: "📝",
@@ -216,16 +195,29 @@ export const Encryption = () => {
           />
         </div>
       )
-    }] : [])
+    }
   ];
 
   return (
     <div className="encryption-form">
-      <Tabs 
-        tabs={tabs} 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-      />
+      <div className="mode-switcher">
+        <button
+          className={activeTab === "encrypt" ? "active" : ""}
+          onClick={() => setActiveTab("encrypt")}
+        >
+          🔐 Шифрование
+        </button>
+        <button
+          className={activeTab === "history" ? "active" : ""}
+          onClick={() => setActiveTab("history")}
+        >
+          📝 История
+        </button>
+      </div>
+      
+      <div className="tab-content">
+        {tabs.find(tab => tab.id === activeTab)?.content}
+      </div>
       {result && (
         <div className="result">
           <div className="result-header">

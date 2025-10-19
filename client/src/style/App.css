@@ -138,6 +138,7 @@
 
 .mode-switcher button:hover {
   background: rgba(255, 255, 255, 0.15);
+  color: #667eea;
 }
 
 .mode-switcher button.active {
