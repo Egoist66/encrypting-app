@@ -18,7 +18,17 @@ authRouter.get(
 authRouter.get(
   '/google/callback',
   (req, res, next) => {
-    console.log('🔄 Google callback received');
+    console.log('🔄 Google callback received', {
+      url: req.url,
+      method: req.method,
+      headers: req.headers,
+      query: req.query,
+      env: {
+        clientUrl: process.env.CLIENT_URL,
+        serverUrl: process.env.SERVER_URL,
+        nodeEnv: process.env.NODE_ENV
+      }
+    });
     next();
   },
   passport.authenticate('google', {
@@ -28,6 +38,11 @@ authRouter.get(
   (req, res) => {
     try {
       console.log('✅ Google authentication successful');
+      console.log('🔍 Request details:', {
+        user: req.user,
+        cookies: req.cookies,
+        headers: req.headers
+      });
       
       // Создаем JWT токен
       const user = req.user as User;
@@ -42,20 +57,26 @@ authRouter.get(
       console.log('🔑 Token created successfully');
 
       // Устанавливаем токен в cookie
-      res.cookie('auth_token', token, {
+      const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
-        domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
-      });
+        path: '/',
+      };
+
+      console.log('🍪 Setting cookie with options:', cookieOptions);
+      res.cookie('auth_token', token, cookieOptions);
 
       console.log('🍪 Cookie set, redirecting to client');
       
       // Успешная авторизация - редирект на клиент
-      res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/`);
+      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/`;
+      console.log('🔄 Redirecting to:', redirectUrl);
+      res.redirect(redirectUrl);
     } catch (error) {
       console.error('❌ Auth callback error:', error);
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=token_failed`);
     }
   }
