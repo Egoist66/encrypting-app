@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Получить Chat ID для Telegram</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .chat-list {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .chat-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        .chat-id {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Получить Chat ID для Telegram</h1>
+        
+        <div class="step">
+            <h3>Шаг 1: Попросите получателя написать боту</h3>
+            <p>Получатель должен найти бота <strong>@encrypt_app_bot</strong> в Telegram и написать ему любое сообщение (например, "привет").</p>
+        </div>
+
+        <div class="step">
+            <h3>Шаг 2: Получите список чатов</h3>
+            <p>Нажмите кнопку ниже, чтобы получить список всех пользователей, которые писали боту:</p>
+            <button class="button" onclick="getChatIds()">📱 Получить список чатов</button>
+        </div>
+
+        <div id="result"></div>
+
+        <div class="step">
+            <h3>Шаг 3: Используйте числовой ID</h3>
+            <p>Скопируйте числовой ID нужного пользователя и вставьте его в приложение для отправки сообщения.</p>
+        </div>
+
+        <div class="step">
+            <h3>❌ Почему нельзя отправлять по @username?</h3>
+            <p>Telegram Bot API не позволяет инициировать разговор с пользователем по username. Пользователь должен сначала написать боту сам.</p>
+        </div>
+    </div>
+
+    <script>
+        async function getChatIds() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">⏳ Загружаем список чатов...</div>';
+
+            try {
+                const response = await fetch('https://api.telegram.org/bot8331038630:AAEdGKGwXOLXenETi9Xk7chSNf57BsTmHpU/getUpdates');
+                const data = await response.json();
+
+                if (data.ok && data.result.length > 0) {
+                    // Группируем по chat_id
+                    const chats = {};
+                    data.result.forEach(update => {
+                        if (update.message && update.message.chat) {
+                            const chat = update.message.chat;
+                            chats[chat.id] = {
+                                id: chat.id,
+                                username: chat.username || 'Нет username',
+                                first_name: chat.first_name || 'Не указано',
+                                last_name: chat.last_name || '',
+                                type: chat.type
+                            };
+                        }
+                    });
+
+                    let html = '<div class="chat-list"><h3>📋 Список пользователей, которые писали боту:</h3>';
+                    
+                    Object.values(chats).forEach(chat => {
+                        html += `
+                            <div class="chat-item">
+                                <div><strong>Имя:</strong> ${chat.first_name} ${chat.last_name}</div>
+                                <div><strong>Username:</strong> @${chat.username}</div>
+                                <div><strong>Chat ID:</strong> <span class="chat-id">${chat.id}</span></div>
+                                <div><strong>Тип:</strong> ${chat.type}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ Нет сообщений от пользователей. Попросите получателя написать боту @encrypt_app_bot</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Ошибка загрузки данных: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

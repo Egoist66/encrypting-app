@@ -116,18 +116,35 @@ export const Encryption = () => {
                   <label htmlFor="telegram-chat-id">
                     Chat ID получателя:
                   </label>
-                  <input
-                    id="telegram-chat-id"
-                    type="text"
-                    value={telegramChatId}
-                    onChange={(e) => setTelegramChatId(e.target.value)}
-                    placeholder="@username или числовой ID"
-                    className="telegram-input"
-                  />
+                  <div className="input-with-button">
+                    <input
+                      id="telegram-chat-id"
+                      type="text"
+                      value={telegramChatId}
+                      onChange={(e) => setTelegramChatId(e.target.value)}
+                      placeholder="Введите числовой ID (например, 568285771)"
+                      className="telegram-input"
+                    />
+                    <button 
+                      type="button"
+                      className="get-chat-id-btn"
+                      onClick={() => window.open('/get-chat-id.html', '_blank')}
+                      title="Получить chat_id"
+                    >
+                      🔍 Получить ID
+                    </button>
+                  </div>
                   <small className="help-text">
-                    Введите числовой ID получателя (например, 568285771) или @username
+                    <strong>📱 Для отправки по @username:</strong>
                     <br />
-                    <strong>Важно:</strong> Получатель должен сначала написать боту @encrypt_app_bot
+                    1. Получатель должен написать боту @encrypt_app_bot
+                    <br />
+                    2. Затем используйте числовой ID (например, 568285771)
+                    <br />
+                    <br />
+                    <strong>❌ Нельзя:</strong> Отправлять напрямую по @username
+                    <br />
+                    <strong>✅ Можно:</strong> Использовать числовой chat_id
                   </small>
                 </div>
                 
