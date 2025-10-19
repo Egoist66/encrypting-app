@@ -1,8 +1,14 @@
 import { useEncryption } from "../../hooks/useEncryption";
 import { useTelegram } from "../../hooks/useTelegram";
-import { useState } from "react";
+import { useMessageHistory } from "../../hooks/useMessageHistory";
+import { MessageHistory } from "../MessageHistory";
+import { Tabs } from "../Tabs";
+import { useState, useContext, useEffect } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 export const Encryption = () => {
+    const authContext = useContext(AuthContext);
+    const user = authContext?.user;
     const { 
       text, 
       setText, 
@@ -11,14 +17,84 @@ export const Encryption = () => {
       isEncrypting, 
       encryptedText, 
       encryptionKey, 
+      originalText, 
       copyEncryptedText, 
       copyKey, 
-      copyStatus 
+      copyStatus
     } = useEncryption();
 
     const { isSending, sendStatus, sendToTelegram, clearStatus } = useTelegram();
+    const { 
+      messages, 
+      isLoading: historyLoading, 
+      saveMessage, 
+      updateMessage, 
+      deleteMessage, 
+      clearHistory,
+      removeDuplicates 
+    } = useMessageHistory(user?.id || null);
+    
     const [telegramChatId, setTelegramChatId] = useState<string>("");
     const [showTelegramForm, setShowTelegramForm] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<string>("encrypt");
+    const [lastSavedHash, setLastSavedHash] = useState<string>(""); // Хеш последнего сохраненного сообщения
+
+    // Функция для проверки наличия дубликатов
+    const hasDuplicates = () => {
+        if (messages.length <= 1) return false;
+        
+        const seen = new Set<string>();
+        for (const message of messages) {
+            const messageKey = btoa(encodeURIComponent(`${message.originalText}-${message.encryptedText}-${message.encryptionKey}`));
+            if (seen.has(messageKey)) {
+                return true;
+            }
+            seen.add(messageKey);
+        }
+        return false;
+    };
+
+    // useEffect для сохранения сообщения после успешного шифрования
+    useEffect(() => {
+        if (encryptedText && encryptionKey && originalText) {
+            // Создаем уникальный хеш для сообщения (безопасно для Unicode)
+            const messageHash = btoa(encodeURIComponent(originalText + encryptedText + encryptionKey)).slice(0, 20);
+            
+            // Проверяем, что это новое сообщение (не дублируем сохранение)
+            if (messageHash !== lastSavedHash) {
+                console.log('💾 Сохраняем новое сообщение в историю:');
+                console.log('📝 originalText:', originalText);
+                console.log('🔐 encryptedText:', encryptedText);
+                console.log('🔑 encryptionKey:', encryptionKey);
+                console.log('🔍 messageHash:', messageHash);
+                console.log('🔍 lastSavedHash:', lastSavedHash);
+                
+                // Дополнительная проверка: убеждаемся, что данные соответствуют друг другу
+                if (originalText.trim() && encryptedText.trim() && encryptionKey.trim()) {
+                    saveMessage({
+                        originalText: originalText,
+                        encryptedText: encryptedText,
+                        encryptionKey: encryptionKey,
+                    });
+                    
+                    setLastSavedHash(messageHash);
+                } else {
+                    console.error('❌ Ошибка: пустые данные для сохранения');
+                }
+            } else {
+                console.log('⚠️ Пропускаем дублирование сообщения с хешем:', messageHash);
+            }
+        }
+    }, [encryptedText, encryptionKey, originalText, saveMessage, lastSavedHash]);
+
+    const handleEncryptWithHistory = async () => {
+        console.log('🔐 Начинаем шифрование с сохранением в историю');
+        console.log('👤 Текущий пользователь:', user);
+        console.log('📝 Текст для шифрования:', text);
+        
+        // Вызываем оригинальную функцию шифрования
+        await handleEncrypt();
+    };
 
     const handleSendToTelegram = async () => {
         if (!telegramChatId.trim()) {
@@ -38,6 +114,16 @@ export const Encryption = () => {
             original_text: text
         });
 
+        // Обновляем сообщение в истории после отправки в Telegram
+        if (success && messages.length > 0) {
+            // Находим последнее сообщение (самое новое)
+            const lastMessage = messages[0];
+            updateMessage(lastMessage.id, {
+                sentToTelegram: true,
+                telegramChatId: telegramChatId.trim()
+            });
+        }
+
         // Очищаем поле chat_id после успешной отправки
         if (success) {
             setTelegramChatId("");
@@ -51,18 +137,74 @@ export const Encryption = () => {
         }
     };
 
+  const tabs = [
+    {
+      id: "encrypt",
+      label: "Шифрование",
+      icon: "🔐",
+      content: (
+        <div className="encrypt-tab">
+          <h2>Зашифровать сообщение</h2>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Введите текст..."
+            rows={4}
+          />
+          <button className="encrypt-btn" onClick={handleEncryptWithHistory} inert={isEncrypting} disabled={!text || isEncrypting}>
+            {isEncrypting ? "Зашифровывается..." : "Зашифровать"}
+          </button>
+        </div>
+      )
+    },
+    {
+      id: "history",
+      label: "История",
+      icon: "📝",
+      content: (
+        <div>
+          <div style={{ marginBottom: '1rem', padding: '0.5rem', background: '#f8f9fa', borderRadius: '4px', fontSize: '0.9rem' }}>
+            <strong>Отладка:</strong> Сообщений: {messages.length}, Загрузка: {historyLoading ? 'Да' : 'Нет'}, Пользователь: {user?.id || 'Нет'}
+            {hasDuplicates() && (
+              <>
+                <br />
+                <button 
+                  onClick={removeDuplicates}
+                  style={{ 
+                    marginTop: '0.5rem', 
+                    padding: '0.25rem 0.5rem', 
+                    fontSize: '0.8rem',
+                    background: '#ffc107',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🧹 Очистить дубликаты
+                </button>
+              </>
+            )}
+          </div>
+          <MessageHistory
+            messages={messages}
+            isLoading={historyLoading}
+            onDeleteMessage={deleteMessage}
+            onClearHistory={clearHistory}
+            onRemoveDuplicates={removeDuplicates}
+            hasDuplicates={hasDuplicates()}
+          />
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="encryption-form">
-      <h2>Зашифровать сообщение</h2>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Введите текст..."
-        rows={4}
+      <Tabs 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab} 
       />
-      <button className="encrypt-btn" onClick={handleEncrypt} inert={isEncrypting} disabled={!text || isEncrypting}>
-        {isEncrypting ? "Зашифровывается..." : "Зашифровать"}
-      </button>
       {result && (
         <div className="result">
           <div className="result-header">
@@ -104,10 +246,10 @@ export const Encryption = () => {
           {/* Telegram отправка */}
           <div className="telegram-section">
             <button 
-              className="telegram-toggle-btn" 
+              className="telegram-send-btn" 
               onClick={toggleTelegramForm}
             >
-              {showTelegramForm ? "✖ Скрыть отправку в Telegram" : "📱 Отправить в Telegram"}
+              {showTelegramForm ? "✖ Скрыть" : "📱 Отправить в Telegram"}
             </button>
             
             {showTelegramForm && (

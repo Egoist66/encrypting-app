@@ -10,6 +10,7 @@ export const useEncryption = () => {
     const [result, setResult] = useState<string>("");
     const [encryptedText, setEncryptedText] = useState<string>("");
     const [encryptionKey, setEncryptionKey] = useState<string>("");
+    const [originalText, setOriginalText] = useState<string>(""); // Сохраняем оригинальный текст
     const [copyStatus, setCopyStatus] = useState<{text: boolean, key: boolean}>({text: false, key: false});
   
     useEffect(() => {
@@ -26,6 +27,7 @@ export const useEncryption = () => {
     const handleEncrypt = async () => {
       try {
         setIsEncrypting(true);
+        setOriginalText(text); // Сохраняем оригинальный текст перед шифрованием
         await delay(1000);
         const response = await fetch("/api/encrypt", {
           method: "POST",
@@ -45,6 +47,7 @@ export const useEncryption = () => {
         }
       } catch (err) {
         console.error("Ошибка шифрования:", err);
+        setIsEncrypting(false);
       }
     };
 
@@ -73,8 +76,9 @@ export const useEncryption = () => {
       isEncrypting, 
       encryptedText, 
       encryptionKey, 
+      originalText, // Возвращаем оригинальный текст
       copyEncryptedText, 
       copyKey, 
-      copyStatus 
+      copyStatus
     };
 };
