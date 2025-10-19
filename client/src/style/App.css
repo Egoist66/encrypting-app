@@ -315,6 +315,10 @@ button {
   margin-top: 0px !important;
 }
 
+pre {
+  text-wrap: auto;
+}
+
 button.decrypt-btn {
   margin-top: 20px !important;
 }
