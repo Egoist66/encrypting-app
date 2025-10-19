@@ -20,18 +20,30 @@ export const configurePassport = () => {
     hasClientSecret: !!clientSecret,
     clientIDLength: clientID ? clientID.length : 0,
     clientSecretLength: clientSecret ? clientSecret.length : 0,
+    clientIDPreview: clientID ? `${clientID.substring(0, 10)}...` : 'undefined',
+    clientSecretPreview: clientSecret ? `${clientSecret.substring(0, 10)}...` : 'undefined',
     serverURL,
-    callbackURL: `${serverURL}/api/auth/google/callback`
+    callbackURL: `${serverURL}/api/auth/google/callback`,
+    allEnvVars: {
+      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      GOOGLE_CLIENT_SECRET: !!process.env.GOOGLE_CLIENT_SECRET,
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      CLIENT_URL: !!process.env.CLIENT_URL,
+      SERVER_URL: !!process.env.SERVER_URL,
+      NODE_ENV: process.env.NODE_ENV
+    }
   });
   
   // Более детальная проверка переменных окружения
   if (!clientID) {
     console.error('❌ GOOGLE_CLIENT_ID is missing or empty');
+    console.error('❌ All environment variables:', Object.keys(process.env).filter(key => key.includes('GOOGLE') || key.includes('JWT') || key.includes('CLIENT') || key.includes('SERVER')));
     throw new Error('GOOGLE_CLIENT_ID environment variable is required but not set.');
   }
   
   if (!clientSecret) {
     console.error('❌ GOOGLE_CLIENT_SECRET is missing or empty');
+    console.error('❌ All environment variables:', Object.keys(process.env).filter(key => key.includes('GOOGLE') || key.includes('JWT') || key.includes('CLIENT') || key.includes('SERVER')));
     throw new Error('GOOGLE_CLIENT_SECRET environment variable is required but not set.');
   }
   
